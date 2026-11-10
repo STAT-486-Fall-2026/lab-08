@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.py[codz]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+catboost_info/
+.vscode/
+.DS_Store
+Thumbs.db

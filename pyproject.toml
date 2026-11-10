@@ -1,0 +1,17 @@
+[project]
+name = "stat-486-lab-08"
+version = "0.1.0"
+description = "STAT 486 Lab 08: learning with XGBoost and CatBoost"
+requires-python = "==3.11.5"
+dependencies = [
+    "catboost>=1.2.8,<1.3",
+    "ipykernel>=6.29,<7",
+    "matplotlib>=3.9,<4",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "scikit-learn>=1.6,<1.8",
+    "xgboost>=3.1,<3.2",
+]
+
+[tool.uv]
+package = false
