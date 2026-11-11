@@ -45,7 +45,7 @@ This creates your local `.venv` and generates `uv.lock`. Keep the supplied `pypr
 
 Open `lab-08.ipynb` in your preferred editor and configure it to use the Python interpreter or notebook kernel in this repository's `.venv`.
 
-Plan for about **3–4 hours**. Complete every numbered code task and written response in the notebook. Begin with its Pokémon primer and guide to all 41 variables; no prior Pokémon knowledge is needed. Optional exploration is not required for full credit.
+Begin with the Pokémon primer and compact variable guide. Run the supplied preparation cells, then complete the remaining TODOs and written responses; no prior Pokémon knowledge is needed.
 
 The local dataset is `data/pokemon.csv`; [data/README.md](data/README.md) records its source, checksum, variable meanings, and known quirks. `lab_helpers.py` supplies cleaning, splitting, and reporting support. Keep both files and the supplied environment unchanged. No Kaggle account, GPU, data download, or additional package installation inside the notebook is needed.
 
