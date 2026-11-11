@@ -9,5 +9,4 @@ catboost_info/
 .vscode/
 .DS_Store
 Thumbs.db
-uv.lock
 lab-08-solutions.ipynb

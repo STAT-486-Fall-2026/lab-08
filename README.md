@@ -39,7 +39,7 @@ The starter repository includes a lab-specific `pyproject.toml`. From the reposi
 uv sync
 ```
 
-This creates your local `.venv` and generates `uv.lock`; both are ignored by Git. Keep the supplied `pyproject.toml` unchanged unless the lab directions explicitly say otherwise.
+This creates your local `.venv` and generates `uv.lock`. Keep the supplied `pyproject.toml` unchanged unless the lab directions explicitly say otherwise.
 
 ### 4. Complete the lab
 
