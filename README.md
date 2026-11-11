@@ -1,4 +1,4 @@
-# Lab 08: What Does Boosting Learn About Pokémon?
+# Lab 08: Boosting Pokémon
 
 <!-- STAT 486 · Fall 2026 -->
 
