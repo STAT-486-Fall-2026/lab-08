@@ -26,7 +26,7 @@ TYPE_NAMES = (
     "psychic", "rock", "steel", "water",
 )
 BATTLE_STATS = ("hp", "attack", "defense", "sp_attack", "sp_defense", "speed")
-SHORTCUT_FEATURES = ("base_egg_steps", "capture_rate", "base_happiness")
+LEGENDARY_FEATURES = (*BATTLE_STATS, "height_m", "weight_kg")
 DROP_ALWAYS = (
     "abilities", "japanese_name", "name", "pokedex_number", "classfication",
     "base_total",
@@ -41,35 +41,28 @@ def load_data(path="data/pokemon.csv"):
     return pd.read_csv(path, encoding="utf-8")
 
 
-def make_features(raw, task, *, restricted=False):
+def make_features(raw, task):
     """Apply deterministic, documented feature rules; learn no statistics.
 
-    Legendary: retain type1, type2, and defensive matchups as predictors.
+    Legendary: use the six battle statistics, height, and weight.
     Type: exclude both type columns, is_legendary, and every against_* column.
-    Restricted legendary: additionally remove the three SHORTCUT_FEATURES.
-    Non-numeric capture_rate is coerced to NaN rather than choosing a form.
+    Convert capture_rate to numeric after the shared row filters.
     Both boosters receive identical pandas categorical columns and numeric NaNs.
     """
     if task not in {"legendary", "type"}:
         raise ValueError("task must be 'legendary' or 'type'.")
-    if restricted and task != "legendary":
-        raise ValueError("The restricted experiment belongs to the legendary task.")
+    if task == "legendary":
+        return raw.loc[:, list(LEGENDARY_FEATURES)].copy()
     drop = set(DROP_ALWAYS) | {"is_legendary"}
-    if task == "type":
-        drop |= {"type1", "type2"}
-        drop |= {column for column in raw if column.startswith("against_")}
-    if restricted:
-        drop |= set(SHORTCUT_FEATURES)
+    drop |= {"type1", "type2"}
+    drop |= {column for column in raw if column.startswith("against_")}
     X = raw.drop(columns=sorted(drop)).copy()
     if "capture_rate" in X:
-        X["capture_rate"] = pd.to_numeric(X["capture_rate"], errors="coerce")
-    for column in ["type1", "type2", "generation"]:
-        if column in X:
-            # A single type is a real category, not an unknown second type.
-            missing_label = "no_secondary_type" if column == "type2" else "unknown"
-            values = X[column].astype("string").fillna(missing_label)
-            # XGBoost 3.1 expects object-backed category names, not StringDtype.
-            X[column] = pd.Categorical(values.astype(object))
+        X["capture_rate"] = pd.to_numeric(X["capture_rate"])
+    if "generation" in X:
+        values = X["generation"].astype("string").fillna("unknown")
+        # XGBoost 3.1 expects object-backed category names, not StringDtype.
+        X["generation"] = pd.Categorical(values.astype(object))
     return X
 
 
@@ -121,7 +114,7 @@ def baseline_preprocessor(X):
 
 
 def binary_metrics(y, probability, *, threshold=0.5):
-    """Unweighted metrics; class 1 is legendary. AP uses probability scores."""
+    """Unweighted metrics and detection counts; class 1 is legendary."""
     probability = np.asarray(probability, dtype=float)
     prediction = (probability >= threshold).astype(int)
     return pd.Series({
@@ -131,22 +124,10 @@ def binary_metrics(y, probability, *, threshold=0.5):
         "recall": recall_score(y, prediction, zero_division=0),
         "f1": f1_score(y, prediction, zero_division=0),
         "log_loss": log_loss(y, probability, labels=[0, 1]),
+        "legendary_found": int(np.sum((np.asarray(y) == 1) & (prediction == 1))),
+        "false_alarms": int(np.sum((np.asarray(y) == 0) & (prediction == 1))),
+        "missed_legendary": int(np.sum((np.asarray(y) == 1) & (prediction == 0))),
     })
-
-
-def threshold_table(y, probability, thresholds=None):
-    """Evaluate the fixed threshold grid on the labels supplied by the caller.
-
-    Use validation labels, then select maximum F1 and the largest threshold
-    if tied. This function returns every candidate and makes no choice.
-    """
-    if thresholds is None:
-        thresholds = np.round(np.arange(0.05, 1.0, 0.05), 2)
-    rows = []
-    for threshold in thresholds:
-        scores = binary_metrics(y, probability, threshold=threshold)
-        rows.append({"threshold": threshold, **scores[["precision", "recall", "f1"]].to_dict()})
-    return pd.DataFrame(rows)
 
 
 def case_table(raw, y, probability, *, threshold=0.5):

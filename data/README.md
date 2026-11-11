@@ -14,7 +14,6 @@ The notebook reads this checked-in file and verifies its checksum. No Kaggle acc
 
 - There are 70 legendary and 731 non-legendary entries; source labels are retained without reclassification.
 - Missing entries: height_m 20, weight_kg 20, percentage_male 98, and type2 384. A blank type2 indicates no recorded secondary type, not a missing physical measurement.
-- Minior has capture_rate = "30 (Meteorite)255 (Core)". The supplied feature helper coerces it to numeric missing.
 - base_total exactly equals the sum of the six battle statistics for every row.
-- The notebook preprocessing excludes entries whose primary type is flying before either modeling task; the checked-in source CSV remains unchanged.
+- The notebook preprocessing excludes entries whose primary type is flying and Minior before either modeling task; the checked-in source CSV remains unchanged.
 - Forms and game rules can change across releases. Interpret values as this supplied snapshot rather than silently updating entries from another source.
